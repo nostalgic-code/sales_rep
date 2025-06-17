@@ -46,15 +46,15 @@ def get_sales_reps():
     except requests.exceptions.RequestException as e:
         return jsonify({"error": "Request failed", "message": str(e)}), 500
 
-
 @app.route('/products', methods=['GET'])
 def get_products():
     """
-    Fetch products and return only the product_code values.
+    Fetch products with ?max=10 and return only the product_code values.
     """
     try:
+        url_with_max = f"{PRODUCTS_URL}?max=10"  # add max=10 here
         response = requests.get(
-            PRODUCTS_URL,
+            url_with_max,
             auth=HTTPBasicAuth(USERNAME, PASSWORD),
             headers={"Accept": "application/json"},
             timeout=30
