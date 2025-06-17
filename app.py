@@ -8,7 +8,9 @@ app = Flask(__name__)
 USERNAME = "d5900938-be95-4412-95b3-50b11983e13e"
 PASSWORD = "90fa0de5-250a-4e99-bd65-85b1854d9c82"
 BASE_URL = "http://102.33.60.228:9183/getResources"
+
 SALES_REPS_URL = f"{BASE_URL}/sales_reps"
+PRODUCTS_URL = f"{BASE_URL}/products"
 
 @app.route('/sales_reps', methods=['GET'])
 def get_sales_reps():
@@ -50,9 +52,45 @@ def get_sales_reps():
         return jsonify({"error": "Request failed", "message": str(e)}), 500
 
 
+@app.route('/products', methods=['GET'])
+def get_products():
+    """
+    Fetch products and return only the product_code values.
+    """
+    try:
+        response = requests.get(
+            PRODUCTS_URL,
+            auth=HTTPBasicAuth(USERNAME, PASSWORD),
+            headers={"Accept": "application/json"},
+            timeout=30
+        )
+
+        if response.status_code == 200:
+            data = response.json()
+
+            # Extract product codes only
+            product_codes = [
+                product.get("product_code")
+                for product in data.get("products", [])
+                if product.get("product_code")
+            ]
+
+            return jsonify({"product_codes": product_codes}), 200
+
+        else:
+            return jsonify({
+                "error": f"HTTP {response.status_code}",
+                "message": response.reason,
+                "details": response.text
+            }), response.status_code
+
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": "Request failed", "message": str(e)}), 500
+
+
 @app.route('/')
 def home():
-    return "Flask API is running. Use /sales_reps to fetch sales representatives."
+    return "Flask API is running. Endpoints: /sales_reps and /products"
 
 
 if __name__ == '__main__':
