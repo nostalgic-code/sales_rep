@@ -52,7 +52,7 @@ def get_products():
     Fetch products with ?max=10 and return only the product_code values.
     """
     try:
-        url_with_max = f"{PRODUCTS_URL}?max=10"  # add max=10 here
+        url_with_max = f"{PRODUCTS_URL}?max=10"
         response = requests.get(
             url_with_max,
             auth=HTTPBasicAuth(USERNAME, PASSWORD),
@@ -61,11 +61,14 @@ def get_products():
         )
         if response.status_code == 200:
             data = response.json()
+
+            # Extract product_code values from the products list
             product_codes = [
                 product.get("product_code")
                 for product in data.get("products", [])
-                if product.get("product_code")
+                if product.get("product_code")  # Ensure key exists and is not None
             ]
+
             return jsonify({"product_codes": product_codes}), 200
         else:
             return jsonify({
@@ -73,6 +76,7 @@ def get_products():
                 "message": response.reason,
                 "details": response.text
             }), response.status_code
+
     except requests.exceptions.RequestException as e:
         return jsonify({"error": "Request failed", "message": str(e)}), 500
 
