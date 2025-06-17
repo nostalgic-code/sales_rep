@@ -78,31 +78,34 @@ def get_products():
 
 
 @app.route('/customers', methods=['GET'])
-def get_customer_accounts():
-    """
-    Fetch customers and return only account_number values.
-    """
+def get_customers():
     try:
+        # Add ?max=100 to prevent overloading
         response = requests.get(
-            CUSTOMERS_URL,
+            "http://102.33.60.228:9183/getResources/customers?max=100",
             auth=HTTPBasicAuth(USERNAME, PASSWORD),
             headers={"Accept": "application/json"},
             timeout=30
         )
+
         if response.status_code == 200:
             data = response.json()
+
+            # Extract only account numbers
             account_numbers = [
                 customer.get("account_number")
                 for customer in data.get("customers", [])
                 if customer.get("account_number")
             ]
+
             return jsonify({"account_numbers": account_numbers}), 200
+
         else:
             return jsonify({
                 "error": f"HTTP {response.status_code}",
-                "message": response.reason,
-                "details": response.text
+                "message": response.reason
             }), response.status_code
+
     except requests.exceptions.RequestException as e:
         return jsonify({"error": "Request failed", "message": str(e)}), 500
 
